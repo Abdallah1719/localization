@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:localization/core/local_data_source/cache_helper.dart';
 import 'package:localization/generated/l10n.dart';
+import 'package:localization/l10n/cubit/local_cubit.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await CacheHelper().init();
   runApp(const MyApp());
 }
 
@@ -12,34 +16,24 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      localizationsDelegates: [
-        S.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: S.delegate.supportedLocales,
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+    return BlocProvider(
+      create: (context) => LocaleCubit()..loadSavedLocale(),
+      child: BlocBuilder<LocaleCubit, String>(
+        builder: (context, locale) {
+          return MaterialApp(
+            localizationsDelegates: LocaleCubit.localizationsDelegates,
+            supportedLocales: S.delegate.supportedLocales,
+            title: 'Flutter Demo',
+            theme: ThemeData(
+              appBarTheme: AppBarTheme(
+                backgroundColor: Color.fromARGB(255, 22, 136, 241),
+              ),
+            ),
+            home: const HomePage(),
+            locale: Locale(locale),
+          );
+        },
       ),
-      home: const HomePage(),
     );
   }
 }
@@ -50,22 +44,44 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Flutter Localization')),
+      appBar: AppBar(title: Text(S.of(context).AppBarTitle)),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('hello world'),
+            Text(S.of(context).bodyText),
             SizedBox(height: 50),
             SizedBox(
-              width: 120,
+              // width: 120,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () => context.read<LocaleCubit>().toggleLocale(),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [Text('English'), Icon(Icons.language)],
+                  mainAxisSize: MainAxisSize.min,
+
+                  children: [
+                    Icon(Icons.language),
+                    Padding(
+                      padding: EdgeInsets.only(
+                        right: LocaleCubit.isArabic() ? 16 : 0,
+                        left: LocaleCubit.isArabic() ? 0 : 16,
+                      ),
+                    ),
+                    Text(
+                      context.watch<LocaleCubit>().state == 'en'
+                          ? 'العربية'
+                          : 'English',
+                    ),
+                  ],
                 ),
               ),
+
+              //  ElevatedButton(
+              //   onPressed: () {},
+              //   child: Row(
+              //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //     children: [Text('English'), Icon(Icons.language)],
+              //   ),
+              // ),
             ),
           ],
         ),

@@ -49,6 +49,36 @@ class S {
   static S? maybeOf(BuildContext context) {
     return Localizations.of<S>(context, S);
   }
+
+  /// `Flutter Localization`
+  String get AppBarTitle {
+    return Intl.message(
+      'Flutter Localization',
+      name: 'AppBarTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `hello world`
+  String get bodyText {
+    return Intl.message(
+      'hello world',
+      name: 'bodyText',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `English`
+  String get buttonText {
+    return Intl.message(
+      'English',
+      name: 'buttonText',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -57,6 +87,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
   List<Locale> get supportedLocales {
     return const <Locale>[
       Locale.fromSubtags(languageCode: 'en'),
+      Locale.fromSubtags(languageCode: 'ar'),
     ];
   }
 
